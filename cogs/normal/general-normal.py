@@ -31,6 +31,18 @@ class General(commands.Cog, name="general-normal"):
         self.bot = bot
 
     @commands.command(
+        name="bgsreport",
+        description="Get a bgsreport from the elitebgs api"
+    )
+    @commands.has_role(938412271665827891)
+    async def bgsreport(self, context: Context) -> None:
+        """
+        Get a bgs report from the elitebgs api
+        :param context: The context in which the command has been executed
+        """
+        print("the has_role() check works!")
+
+    @commands.command(
         name="botinfo",
         description="Get some useful (or not) information about the bot.",
     )
@@ -41,15 +53,16 @@ class General(commands.Cog, name="general-normal"):
         :param context: The context in which the command has been executed.
         """
         embed = disnake.Embed(
-            description="Used [Krypton's](https://krypt0n.co.uk) template",
-            color=0x9C84EF
+            description="Used [Krypton's](https://krypt0n.co.uk) template, this bot was developed for the use in the "
+                        "ARRC Discord server for squadron management. (And to stage a coup)",
+            color=0x6800B6
         )
         embed.set_author(
             name="Bot Information"
         )
         embed.add_field(
             name="Owner:",
-            value="Krypton#7331",
+            value="CommanderKronos#5555",
             inline=True
         )
         embed.add_field(

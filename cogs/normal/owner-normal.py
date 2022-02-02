@@ -52,6 +52,7 @@ class Owner(commands.Cog, name="owner-normal"):
         """
         The bot will say anything you want.
         """
+        print(context.message)
         await context.send(message)
 
     @commands.command(

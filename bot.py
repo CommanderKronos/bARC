@@ -64,7 +64,7 @@ bot = Bot(command_prefix=config["prefix"], intents=intents)
 @bot.event
 async def on_ready() -> None:
     """
-    The code in this even is executed when the bot is ready
+    The code in this event is executed when the bot is ready
     """
     print(f"Logged in as {bot.user.name}")
     print(f"disnake API version: {disnake.__version__}")
@@ -79,7 +79,7 @@ async def status_task() -> None:
     """
     Setup the game status task of the bot
     """
-    statuses = ["with you!", "with Krypton!", "with humans!"]
+    statuses = ["the fed's feelings.", "with enhanced PAs", "with thargoids!"]
     await bot.change_presence(activity=disnake.Game(random.choice(statuses)))
 
 
@@ -103,7 +103,8 @@ if __name__ == "__main__":
     """
     This will automatically load slash commands and normal commands located in their respective folder.
     
-    If you want to remove slash commands, which is not recommended due to the Message Intent being a privileged intent, you can remove the loading of slash commands below.
+    If you want to remove slash commands, which is not recommended due to the Message Intent being a privileged intent, 
+    you can remove the loading of slash commands below.
     """
     load_commands("slash")
     load_commands("normal")
