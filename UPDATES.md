@@ -47,9 +47,9 @@ Here is the list of all the updates that I made on this template.
 ### Version 2.7
 
 * Added a check for `commands.MissingRequiredArgument` in the error handler
-* Added a disclaimer section in the [README](README.md) file
+* Added a disclaimer section in the [README](README(OLD).md) file
 * Added the latency of the bot in the `ping` command
-* Created the [TODO list](TODO.md) file
+* Created the [TODO list](README.md) file
 * Fixed some error embeds having success (green) colors
 * Removed an unnecessary `self.bot.logout()` statement
 * Removed the `dick` command, as I want to keep this template safe for work
@@ -60,7 +60,7 @@ Here is the list of all the updates that I made on this template.
 ### Version 2.6
 
 * Added new `dailyfact` command that gives a random fact every day, using cool down
-* Fixed some typos in [README.md](README.md)
+* Fixed some typos in [README.md](README(OLD).md)
 * Remade the `on_command_error` event for `CommandOnCooldown`
 
 ### Version 2.5
