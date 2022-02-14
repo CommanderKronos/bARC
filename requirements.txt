@@ -1,2 +1,6 @@
-aiohttp
-disnake
+aiohttp~=3.8.1
+disnake~=2.3.0
+requests~=2.27.1
+
+attr~=0.3.1
+pydantic~=1.9.0
