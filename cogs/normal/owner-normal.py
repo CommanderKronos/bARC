@@ -15,6 +15,7 @@ from disnake.ext import commands
 from disnake.ext.commands import Context
 
 from helpers import json_manager, checks
+from helpers import sqllite as sql
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")

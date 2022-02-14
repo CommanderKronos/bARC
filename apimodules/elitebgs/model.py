@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any, List, Optional
 
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class Model(BaseModel):
@@ -82,7 +83,7 @@ class TickTimesHistoryV5(BaseModel):
 class TickTimesV5(BaseModel):
     _id: Optional[str] = None
     __v: Optional[int] = None
-    last_tick: Optional[str] = None
+    time: Optional[str] = None
     updated_at: Optional[str] = None
     history: Optional[List[TickTimesHistoryV5]] = None
 
@@ -185,6 +186,19 @@ class EBGSFactionPresenceV5(BaseModel):
     system_details: Optional[EBGSSystemsV5] = None
     updated_at: Optional[str] = None
 
+    def getallstates(self):
+        active_states = []
+        pending_states = []
+        recovering_states = []
+        for astate in self.active_states:
+            active_states.append(astate.state)
+        for pstate in self.pending_states:
+            pending_states.append(pstate.state)
+        for rstate in self.recovering_states:
+            recovering_states.append(rstate.state)
+        return {'active': active_states, 'pending': pending_states,
+                'recovering': recovering_states}
+
 
 class EBGSFactionRefV5(BaseModel):
     faction_id: Optional[str] = None
@@ -204,7 +218,7 @@ class EBGSFactionsV5(BaseModel):
     allegiance: Optional[str] = None
     home_system_name: Optional[str] = None
     is_player_faction: Optional[bool] = None
-    faction_presence: Optional[List[EBGSFactionPresenceV5]] = None
+    faction_presence: Optional[EBGSFactionPresenceV5] = None
     history: Optional[List[EBGSFactionHistoryV5]] = None
 
 

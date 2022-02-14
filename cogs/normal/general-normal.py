@@ -16,8 +16,13 @@ import aiohttp
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Context
+from pprint import pprint
+from datetime import date
+from tabulate import tabulate
 
 from helpers import checks
+from helpers import sqllite as sql
+from helpers import bgsapi as bgs
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
@@ -28,7 +33,39 @@ else:
 
 class General(commands.Cog, name="general-normal"):
     def __init__(self, bot):
+        if "data" not in os.listdir():
+            os.mkdir("data")
+        self.conn, self.cursor = sql.create_conn(os.getcwd() + r"\data\bARC.db")
         self.bot = bot
+
+    @commands.group(
+        name="bgsget"
+    )
+    async def bgsget(self, context: Context):
+        if context.invoked_subcommand is None:
+            await context.send("bgs get what?")
+
+    @commands.command(
+        name="previoustick",
+        decription="Get data of the previous tick"
+    )
+    @commands.has_role(938412271665827891)
+    async def previoustick(self, context: Context) -> None:
+        """
+        Get data of the previous tick
+        """
+        print(bgs.getprevioustick())
+
+    @commands.command(
+        name="lasttick",
+        decription="Get data of the most recent tick"
+    )
+    @commands.has_role(938412271665827891)
+    async def lasttick(self, context: Context) -> None:
+        """
+        Get data of the most recent tick
+        """
+        print(bgs.getlasttick())
 
     @commands.command(
         name="bgsreport",
@@ -38,9 +75,44 @@ class General(commands.Cog, name="general-normal"):
     async def bgsreport(self, context: Context) -> None:
         """
         Get a bgs report from the elitebgs api
-        :param context: The context in which the command has been executed
         """
-        print("the has_role() check works!")
+        data, conflicts = bgs.bgsreport()
+        # pprint(data)
+        pprint(conflicts)
+        inline = True
+        for system in data.keys():
+            embed = disnake.Embed(
+                title="BGSReport of {} / {}".format(system, date.today())
+            )
+            for factiondict in data[system]:
+                conflicts = ""
+                conflictdata = []
+                if factiondict['conflicts'] is not []:
+                    for conflict in factiondict['conflicts']:
+                        stake = conflict.stake
+                        oppstake = factiondict
+                        # Faction names
+                        conflictdata.append({factiondict['name'], conflict.opponent_name})
+                        # Conflict stakes
+
+                content = "Influence: {}, Change: {}\n" \
+                          "Active states:      {}\n" \
+                          "Pending states:     {}\n" \
+                          "Recovering states:  {}\n" \
+                          "Conflicts:\n" \
+                          "{}".format(factiondict['influence'],
+                                      factiondict['infchange'], factiondict['active'],
+                                      factiondict['pending'], factiondict['recovering'],
+                                      conflicts)
+                if conflicts != "":
+                    inline = False
+
+                embed.add_field(
+                    name=factiondict['name'],
+                    value=content,
+                    inline=inline
+                )
+            await context.send(embed=embed)
 
     @commands.command(
         name="botinfo",

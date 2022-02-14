@@ -1,22 +1,18 @@
 # TODO List
 
-## Version 4.2 (Goal: Middle January 2022)
+## Not done
 
-* [ ] Add a timeout command.
+* [ ] Add acceptable Exception handling in helpers/sqllite.py
+* [ ] Add bgsbot functionality
+* [ ] Add FC management functionality
+* [ ] Add permission management functionality
+* [ ] Add automated bgsreport functionality
+* [ ] Add #currenttasks automation
+* [ ] Add influence graph functionality
+  
+## Low priority
 
-## Version 4.3 (Goal: End February 2022)
-
-* [ ] Add a lock command that will let administrators temporary lock a channel, useful in case of a raid
-* [ ] Add an archive command that lets administrators archive a text channel in a text file
-
-## No milestone
-
-* [ ] Add a code of conduct for the repository
-* [ ] Add a basic slur word filter
-* [ ] Add an issue and pull request template for the repository
+* [ ] Add functionality to get data on locked down carriers
 
 ## Done
 
-* [X] Add a *"hackban"* command (ban a user by ID from a guild without the user being in it)
-* [X] Be able to save data to JSON (blacklist, owners, etc.)
-* [X] Move config to JSON
