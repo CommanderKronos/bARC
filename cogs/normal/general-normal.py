@@ -87,7 +87,9 @@ class General(commands.Cog, name="general-normal"):
             for factiondict in data[system]:
                 conflicts = ""
                 conflictdata = []
-                if factiondict['conflicts'] is not []:
+                if factiondict['conflicts']:
+                    # Add conflict cross referencing and visualisation
+                    pprint(factiondict['conflicts'])
                     for conflict in factiondict['conflicts']:
                         stake = conflict.stake
                         oppstake = factiondict
