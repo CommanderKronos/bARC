@@ -4,6 +4,8 @@ requests~=2.27.1
 
 attr~=0.3.1
 pydantic~=1.9.0
-tabulate~=0.8.9
 attrs~=21.4.0
 cattrs~=1.10.0
+matplotlib~=3.5.1
+plotly~=5.6.0
+Pillow~=9.0.1

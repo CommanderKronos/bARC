@@ -7,6 +7,8 @@
 import requests
 from pprint import pprint
 from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 from apimodules.elitebgs import model
 from helpers import sqllite
@@ -74,14 +76,35 @@ def getlasttick():
     return datetime.fromisoformat(data.time)
 
 
+def conflict_pic_gen(conflicts: dict, system: str):
+    fig, ax = plt.subplots()
+    table_data = []
+    for conflict in conflicts[system]:
+        table_data.append(["Type:", "Participants:", "Stakes:", "Days won:"])
+        table_data.append([conflict['type'], conflict['party1'], conflict['stake1'], conflict['dayswon1']])
+        table_data.append(['           ', conflict['party2'], conflict['stake2'], conflict['dayswon2']])
+
+        # table_data.append(["Type:", conflict['type'], '           '])
+        # table_data.append(["Participants:", conflict['party1'], conflict['party2']])
+        # table_data.append(["Stakes:", conflict['stake1'], conflict['stake2']])
+        # table_data.append(["Status:", conflict['dayswon1'], conflict['dayswon2']])
+    # table = ax.table(cellText=table_data, loc='best')
+    # ax.axis('off')
+    # plt.axis('off')
+    fig = go.Figure(data=[go.Table(cells=dict(values=table_data))])
+    # fig.update_layout(width=500, height=300)
+    fig.write_image('temp/conflicttable.png')
+
+
 def bgsreport():
     """Return """
     monitored_systems = sqllite.monitoredsystems()
     data = {}
+    conflicts = {}
     previoustick = getprevioustick()
     timeMin = unix_time_millis(previoustick - timedelta(hours=2))
     timeMax = unix_time_millis(previoustick + timedelta(hours=2))
-    conflicts = {}
+
     for system in monitored_systems:
         payloads = {'name': system, 'factionHistory': 'true', 'factionDetails': 'true', 'timeMin': timeMin,
                     'timeMax': timeMax}
@@ -89,24 +112,36 @@ def bgsreport():
         r = model.EBGSSystemsPageV5(**response.json())
         for doc in r.docs:
             data[doc.name] = []
+            conflicts[doc.name] = []
             history = doc.faction_history
             infhistory = {}
 
+            for conflict in doc.conflicts:
+                conflicts[doc.name].append(
+                    {'type': conflict.type, 'party1': conflict.faction1.name, 'stake1': conflict.faction1.stake,
+                     'dayswon1': conflict.faction1.days_won, 'party2': conflict.faction2.name,
+                     'stake2': conflict.faction2.stake, 'dayswon2': conflict.faction2.days_won}
+                )
+
+            # Get Influence history
             for old_faction in history:
                 infhistory[old_faction.faction_name] = old_faction.influence
+            # Get current influence and other data
             for faction in doc.factions:
                 faction_presence = faction.faction_details.faction_presence
                 states = faction_presence.getallstates()
                 newinf = faction_presence.influence
+
+                # Add logic to split the state definition if it exists out of two words or more
+                for state_type in states.keys():
+                    for state_index in range(len(states[state_type])):
+                        states[state_type][state_index] = states[state_type][state_index][0].upper() + states[state_type][state_index][1:]
 
                 if faction.name in infhistory.keys():
                     oldinf = infhistory[faction.name]
                 else:
                     oldinf = newinf
                 infchange = "{0:.2%}".format(newinf - oldinf)
-
-                for conflict in faction_presence.conflicts:
-                    conflicts[conflict.opponent_name] = {'stake': conflict.stake, 'system': system}
 
                 # add last update time
                 data[doc.name].append(

@@ -18,7 +18,6 @@ from disnake.ext import commands
 from disnake.ext.commands import Context
 from pprint import pprint
 from datetime import date
-from tabulate import tabulate
 
 from helpers import checks
 from helpers import sqllite as sql
@@ -78,41 +77,27 @@ class General(commands.Cog, name="general-normal"):
         """
         data, conflicts = bgs.bgsreport()
         # pprint(data)
-        pprint(conflicts)
-        inline = True
+        # pprint(conflicts)
         for system in data.keys():
             embed = disnake.Embed(
                 title="BGSReport of {} / {}".format(system, date.today())
             )
+            # if conflicts[system]:
+            #     bgs.conflict_pic_gen(conflicts[system], system)
+            #     embed.set_image(file=disnake.File("temp/conflicttable.png"))
             for factiondict in data[system]:
-                conflicts = ""
-                conflictdata = []
-                if factiondict['conflicts']:
-                    # Add conflict cross referencing and visualisation
-                    pprint(factiondict['conflicts'])
-                    for conflict in factiondict['conflicts']:
-                        stake = conflict.stake
-                        oppstake = factiondict
-                        # Faction names
-                        conflictdata.append({factiondict['name'], conflict.opponent_name})
-                        # Conflict stakes
-
                 content = "Influence: {}, Change: {}\n" \
                           "Active states:      {}\n" \
                           "Pending states:     {}\n" \
-                          "Recovering states:  {}\n" \
-                          "Conflicts:\n" \
-                          "{}".format(factiondict['influence'],
-                                      factiondict['infchange'], factiondict['active'],
-                                      factiondict['pending'], factiondict['recovering'],
-                                      conflicts)
-                if conflicts != "":
-                    inline = False
-
+                          "Recovering states:  {}\n".format(factiondict['influence'],
+                                                            factiondict['infchange'],
+                                                            ", ".join(factiondict['active']),
+                                                            ", ".join(factiondict['pending']),
+                                                            ", ".join(factiondict['recovering']))
                 embed.add_field(
                     name=factiondict['name'],
                     value=content,
-                    inline=inline
+                    inline=False
                 )
             await context.send(embed=embed)
 
