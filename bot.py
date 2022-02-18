@@ -11,7 +11,7 @@ import os
 import platform
 import random
 import sys
-from helpers import sqllite
+from helpers import sqlite
 
 import disnake
 from disnake import ApplicationCommandInteraction

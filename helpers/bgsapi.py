@@ -3,6 +3,7 @@
 # systems https://elitebgs.app/api/ebgs/v5/systems?<params>
 # stations https://elitebgs.app/api/ebgs/v5/stations?<params>
 # ticks https://elitebgs.app/api/ebgs/v5/ticks?<params>
+from typing import Tuple
 
 import requests
 from pprint import pprint
@@ -10,8 +11,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-from apimodules.elitebgs import model
-from helpers import sqllite
+from modules.elitebgs import model
+from helpers import sqlite
 
 # All different types of paramaters for every endpoint.
 
@@ -27,28 +28,38 @@ STATIONS_PARAMS = ['eddbid', 'marketid', 'name', 'ships', 'moduleid', 'controlli
                    'allegiancename', 'governmentname', 'minlandingpad', 'distancestar', 'facilities', 'commodities',
                    'stationtypename', 'planetary', 'economyname', 'permit', 'power', 'powerstatename', 'systemname',
                    'page']
-SYSTEMS_PARAMS = ['eddbid', 'systemaddress', 'name', 'allegiancename', 'governmentname', 'primaryeconomyname', 'power',
-                  'powerstatename', 'permit', 'securityname', 'page']
+SYSTEMS_PARAMS = ['id', 'eddbid', 'name', 'allegiance', 'government', 'state', 'primaryEconomy', 'secondaryEconomy',
+                  'faction', 'factionId', 'factionControl', 'security', 'activeState', 'pendingState',
+                  'recoveringState', 'influenceGT', 'influenceLT', 'factionAllegiance', 'factionGovernment',
+                  'referenceSystem', 'referenceSystemID', 'referenceDistance', 'referenceDistanceMin', 'sphere',
+                  'beginsWith', 'minimal', 'factionDetails', 'factionHistory', 'timeMin', 'timeMax', 'count', 'page']
 
 sysend = 'https://elitebgs.app/api/ebgs/v5/systems'
 facend = 'https://elitebgs.app/api/ebgs/v5/factions'
 statend = 'https://elitebgs.app/api/ebgs/v5/stations'
 ticksend = 'https://elitebgs.app/api/ebgs/v5/ticks'
 
-# payloads = {'faction': 'Alliance Rapid-reaction Corps'}
-# r = requests.get(sysend, params=payloads)
-# rdata = r.json()
-#
-# response = model.EBGSSystemsPageV5(**rdata)
-#
-# splitter = "---------------------------"
-#
-# pprint(response.dict())
-# pprint(splitter)
-# for i in response.docs:
-#     pprint(i.name)
-#     pprint(splitter)
 splitter = "---------------------------"
+
+
+def validate_sys_params(params: tuple) -> Tuple[bool, str]:
+    for param in params:
+        if param not in SYSTEMS_PARAMS:
+            return False, param
+    return True, 'none'
+
+
+def system_lookup() -> model.EBGSSystemsPageV5:
+    pass
+
+
+def basic_system_lookup(system_name: str):
+    """Lookup system information based on name with EliteBGS API"""
+    payloads = {'name': system_name}
+    data = model.EBGSSystemsPageV5(**requests.get(sysend, params=payloads).json())
+    system = data.docs[0]
+    return {'system_id': system.id, 'eddbid': system.eddb_id, 'name': system.name, 'x': system.x, 'y': system.y,
+            'z': system.z}
 
 
 def unix_time_millis(dt):
@@ -98,7 +109,7 @@ def conflict_pic_gen(conflicts: dict, system: str):
 
 def bgsreport():
     """Return """
-    monitored_systems = sqllite.monitoredsystems()
+    monitored_systems = sqlite.monitoredsystems()
     data = {}
     conflicts = {}
     previoustick = getprevioustick()
@@ -141,11 +152,11 @@ def bgsreport():
                     oldinf = infhistory[faction.name]
                 else:
                     oldinf = newinf
-                infchange = "{0:.2%}".format(newinf - oldinf)
+                infchange = newinf - oldinf
 
                 # add last update time
                 data[doc.name].append(
-                    {'name': faction.name, 'influence': "{0:.2%}".format(newinf),
+                    {'name': faction.name, 'influence': newinf,
                      'active': states['active'], 'pending': states['pending'],
                      'recovering': states['recovering'], 'conflicts': faction_presence.conflicts,
                      'infchange': infchange})

@@ -1,4 +1,5 @@
 import sqlite3
+from helpers import bgsapi
 
 
 def monitoredsystems():
@@ -20,9 +21,12 @@ def create_conn(location):
 def initialize_tables(c):
     try:
         c.execute("""CREATE TABLE monitoredsystems (
-                        name text,
-                        priority integer,
-                        arrcinf real
+                        system_id text,
+                        eddb_id integer,
+                        system_name text,
+                        x real,
+                        y real,
+                        z real
                         )""")
     except sqlite3.OperationalError:
         print("ERROR IN initialize_tables()")

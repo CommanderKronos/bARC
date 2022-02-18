@@ -239,6 +239,7 @@ class EBGSSystemHistoryV5(BaseModel):
 
 class EBGSSystemsV5(BaseModel):
     _id: Optional[str] = None
+    id: Optional[str] = None
     __v: Optional[int] = None
     eddb_id: Optional[int] = None
     name: Optional[str] = None
@@ -265,6 +266,10 @@ class EBGSSystemsV5(BaseModel):
     faction_history: Optional[List[EBGSFactionHistorySystemV5]] = None
     history: Optional[List[EBGSSystemHistoryV5]] = None
     updated_at: Optional[str] = None
+
+    def __init__(self, **data: Any):
+        super().__init__(**data)
+        self.id = data['_id']
 
 
 class EBGSFactionsPageV5(BaseModel):

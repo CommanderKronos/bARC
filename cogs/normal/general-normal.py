@@ -20,8 +20,9 @@ from pprint import pprint
 from datetime import date
 
 from helpers import checks
-from helpers import sqllite as sql
+from helpers import sqlite as sql
 from helpers import bgsapi as bgs
+from modules.flags import sysflags
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
@@ -37,12 +38,51 @@ class General(commands.Cog, name="general-normal"):
         self.conn, self.cursor = sql.create_conn(os.getcwd() + r"\data\bARC.db")
         self.bot = bot
 
+    @commands.command(
+        name="flagtest"
+    )
+    @checks.not_blacklisted()
+    async def flagtest(self, context: Context, *, flags: sysflags.BasicFlags):
+        # print(flags.get_flags())
+        for flag in flags.get_flags():
+            print(flags.get_flags()[flag])
+        print(flags.test)
+        print(flags.cringe)
+        print(flags.based)
+
     @commands.group(
         name="bgsget"
     )
     async def bgsget(self, context: Context):
         if context.invoked_subcommand is None:
             await context.send("bgs get what?")
+
+    @bgsget.command(
+        name="system"
+    )
+    @checks.not_blacklisted()
+    async def bgsget_system(self, context: Context, *args):
+        if len(args) == 1:
+            result = bgs.basic_system_lookup(args[0])
+            embed = disnake.Embed(
+                title="Search Result:"
+            )
+            content = "System_id: {}\n" \
+                      "EDDB_id: {}\n" \
+                      "X Coord: {}\n" \
+                      "Y Coord: {}\n" \
+                      "Z Coord: {}\n".format(result['system_id'], result['eddbid'], result['x'],
+                                             result['y'], result['z'])
+            embed.add_field(
+                name=result['name'],
+                value=content
+            )
+        else:
+            embed = disnake.Embed()
+            valid_params, param = bgs.validate_sys_params(args)
+            if valid_params:
+                pass
+        await context.send(embed=embed)
 
     @commands.command(
         name="previoustick",
@@ -76,8 +116,6 @@ class General(commands.Cog, name="general-normal"):
         Get a bgs report from the elitebgs api
         """
         data, conflicts = bgs.bgsreport()
-        # pprint(data)
-        # pprint(conflicts)
         for system in data.keys():
             embed = disnake.Embed(
                 title="BGSReport of {} / {}".format(system, date.today())
@@ -85,12 +123,29 @@ class General(commands.Cog, name="general-normal"):
             # if conflicts[system]:
             #     bgs.conflict_pic_gen(conflicts[system], system)
             #     embed.set_image(file=disnake.File("temp/conflicttable.png"))
+
             for factiondict in data[system]:
+                # Double down: \U000023EC   # Double excla: \U0000203C
+                # Double up: \U000023EB     # Green tick: \U00002705
+                # Down: \U0001F53D          # Excla: \U00002757
+                # Up: \U0001F53C            # Blue tick: \U00002611
+
+                if factiondict['infchange'] <= -0.05:
+                    infchange = "{0:.2%}".format(factiondict['infchange']) + '\U0000203C'
+                elif factiondict['infchange'] >= 0.05:
+                    infchange = "{0:.2%}".format(factiondict['infchange']) + '\U00002705'
+                elif factiondict['infchange'] < 0.0:
+                    infchange = "{0:.2%}".format(factiondict['infchange']) + '\U00002757'
+                elif factiondict['infchange'] > 0.0:
+                    infchange = "{0:.2%}".format(factiondict['infchange']) + '\U00002611'
+                else:
+                    infchange = "{0:.2%}".format(factiondict['infchange'])
+
                 content = "Influence: {}, Change: {}\n" \
                           "Active states:      {}\n" \
                           "Pending states:     {}\n" \
-                          "Recovering states:  {}\n".format(factiondict['influence'],
-                                                            factiondict['infchange'],
+                          "Recovering states:  {}\n".format("{0:.2%}".format(factiondict['influence']),
+                                                            infchange,
                                                             ", ".join(factiondict['active']),
                                                             ", ".join(factiondict['pending']),
                                                             ", ".join(factiondict['recovering']))
